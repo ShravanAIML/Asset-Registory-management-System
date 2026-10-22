@@ -1,31 +1,4 @@
 
-```
-### 1. Asset Table
-
-Stores the details and current status of each organizational asset.
-
-| Column | Description |
-|---|---|
-| Name | Asset name, such as Dell Latitude 5440 |
-| Tag | Unique asset tag or barcode |
-| Type | Laptop, Mouse, Keyboard, Monitor, Headset, Other |
-| Condition | New, Good, Fair, Damaged |
-| Status | Available, Checked Out, Under Repair, Retired |
-
-### 2. Checkout Table
-
-Maintains the borrowing and return history for each asset.
-
-| Column | Description |
-|---|---|
-| Checkout ID | Unique checkout reference |
-| Asset | Lookup to the Asset table |
-| User | Assigned employee or borrower |
-| From | Check-out date and time |
-| Due | Expected return date and time |
-| ReturnedOn | Actual return date and time |
-
-**Relationship:** One asset can have multiple checkout records over time, but it must never have more than one active checkout at a time.
 
 ## 📱 Application Features
 
@@ -37,12 +10,50 @@ Maintains the borrowing and return history for each asset.
 
 ### 2. Check-Out Management
 
-- Displays assets available for borrowing.
-- Supports selecting an asset and assigning it to a user.
-- Allows the user to specify a due date.
-- Creates a checkout record in Dataverse.
+The Check-Out screen allows users to select an available asset, assign it to a user, specify a due date, and record the checkout transaction in Microsoft Dataverse.
+
+**Key functionalities:**
+- Validates whether the selected asset is available.
+- Creates a new checkout record in the `Checkouts` table.
+- Records the assigned user, checkout date and time, and due date.
 - Updates the asset status to `Checked Out`.
-- Validates availability to prevent duplicate check-outs.
+- Displays success or error notifications.
+
+#### Power Fx Implementation
+
+The following code is used in the Check Out button's `OnSelect` property in Power Apps.
+
+```powerfx
+If(
+    // Guard: asset must still be available
+    galAssets.Selected.Status <> 'Status (Assets)'.Available,
+    Notify(
+        "This asset is already checked out.",
+        NotificationType.Error
+    ),
+    Patch(
+        Checkouts,
+        Defaults(Checkouts),
+        {
+            Asset: galAssets.Selected,
+            User: cmbUser.Selected,
+            From: Now(),
+            Due: dpDue.SelectedDate
+        }
+    );
+    Patch(
+        Assets,
+        galAssets.Selected,
+        {
+            Status: 'Status (Assets)'.'Checked Out'
+        }
+    );
+    Notify(
+        "Check-out successful.",
+        NotificationType.Success
+    )
+)
+```
 
 ### 3. Check-In Management
 
