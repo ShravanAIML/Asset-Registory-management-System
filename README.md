@@ -1,4 +1,4 @@
-# Asset-Registory-management-System
+# Asset-Registry-management-System
 
 A Microsoft Power Platform application designed to manage organizational assets, track check-outs and returns, prevent duplicate check-outs, automate due-date reminders, and monitor asset utilization.
 
